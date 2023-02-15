@@ -3,7 +3,7 @@ library(ggplot2)
 library(plotly)
 library(lubridate)
 library(dplyr)
-setwd("~/ssh-stuff/sqlstuff/databases/musica/2022") #path to CSV file
+setwd("PATH/TO/CSV/FOLDER") #path to CSV file
 
 #### Function used ####
 mo2Num <- function(x) {match(tolower(x), tolower(month.abb))}
