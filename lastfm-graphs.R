@@ -44,7 +44,7 @@ top10 <- top10[top10$Artist %in% top_artists$Artist,]
 
 for (i in 1:10){
   for (j in 1:12){
-    if (all(top10[top10$Artist == top10$Artist[i],2] != j)) {
+    if (all(top10[top10$Artist == top_artists$Artist[i],2] != j)) {
       top10 <- rbind(top10, c(top10$Artist[i],j,0))
     }
   }
