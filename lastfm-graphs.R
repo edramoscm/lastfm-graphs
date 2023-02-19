@@ -98,13 +98,13 @@ top10_albums <- top10_albums[top10_albums$Album %in% top_albums$Album,]
 for (i in 1:10){
   for (j in 1:12){
     if (all(top10_albums[top10_albums$Album == top_albums$Album[i],2] != j)) {
-      top10_albums <- rbind(top10_albums, c(top10_albums$Album[i],j,0))
+      top10_albums <- rbind(top10_albums, c(top_albums$Album[i],j,0))
     }
   }
   if (i == 10){
     top10_albums$Month <- as.integer(top10_albums$Month)
-    top10_albums$n <- as.integer(top10_albums$n)
-    top10_albums <- top10_albums[order(top10_albums$Month, top10_albums$n, decreasing=T),]
+    top10_albums$count <- as.integer(top10_albums$count)
+    top10_albums <- top10_albums[order(top10_albums$Month, top10_albums$count, decreasing=T),]
   }
 }
 
