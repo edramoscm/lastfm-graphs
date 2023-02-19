@@ -97,7 +97,7 @@ top10_albums <- top10_albums[top10_albums$Album %in% top_albums$Album,]
 
 for (i in 1:10){
   for (j in 1:12){
-    if (all(top10_albums[top10_albums$Album == top10_albums$Album[i],2] != j)) {
+    if (all(top10_albums[top10_albums$Album == top_albums$Album[i],2] != j)) {
       top10_albums <- rbind(top10_albums, c(top10_albums$Album[i],j,0))
     }
   }
