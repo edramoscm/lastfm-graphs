@@ -6,13 +6,15 @@
 
 <p>Anyway, now to the real thing.</p>
 
-<p>You should get the CSV with all your Last.fm data first. It shouldn't be impossible to data scrape it, but I got mine from <a href="https://benjaminbenben.com/lastfm-to-csv/">Benjamin BenBen's</a> website. </p>
+<p>You should get the CSV with all your Last.fm data first. It shouldn't be impossible to data scrape it, but I got mine from <a href="https://benjaminbenben.com/lastfm-to-csv/">Benjamin BenBen's</a> website.</p>
 
-</p>You'll need the libraries data.table, ggplot2, plotly, lubridate and dplyr. Pay attention to the path to the CSV file, there are only two lines of code in which I commented, and the first one is for that.</p>
+</p>You'll need the libraries data.table, ggplot2, plotly and dplyr. Pay attention to the path to the CSV file, there are only two lines of code in which I commented, and the first one is for that. The second one isn't too far off. In line 18, change the name of the CSV file to your username's, just like the file you download from BenBen's website.</p>
 
-<p>The second one isn't too far off. In line 13, change the name of the CSV file to your username's, just like the file you download from BenBen's website.</p>
+<p>I recently added some lines to create PNG files with the results for the ggplot elements. Change "PATH/TO/PNG/WITH/ITS/NAME" to the file path and name you want, without the year or the ".png" at the end. This happens in lines 69, 129 and 194.</p>
 
-<p>You should pay attention to lines from 169 to 174. Depending on your timezone, you may have to change "[TIMEZONE]" to whatever your timezone actually is.</p>
+<p>The graphs' dimensions are 2400x1350 for the ones that go throughout the year and 1350x1350 for the last one, which is in polar coordinates.</p>
+
+<p>You should pay attention to lines from 186 to 190. Depending on your timezone, you may have to change "[TIMEZONE]" to whatever your timezone actually is.</p>
 
 <p>Get creative! Try to make a regression, for example! My plotly graph ended up close to a y=A/x^0.5 + B, what about yours?</p>
 
