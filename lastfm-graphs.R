@@ -26,6 +26,7 @@ db <- data.frame(db,newcolumns)
 db$Year <- as.integer(db$Year)
 rm(newcolumns)
 
+# Insert the year you want to get the results for instead of 2023
 db_YEAR <- db[db$Year == 2023,]
 
 db_YEAR$Month <- mo2Num(db_YEAR$Month)
