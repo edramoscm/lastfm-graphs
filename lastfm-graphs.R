@@ -1,23 +1,32 @@
+# install.packages("data.table")
+# install.packages("tidyverse")
+# install.packages("plotly")
+# install.packages("xtable")
+# install.packages("lubridate")
+
 library(data.table)
 library(ggplot2)
 library(plotly)
 library(dplyr)
-setwd("PATH/TO/CSV/FOLDER") #path to CSV file
+setwd("PATH/TO/FOLDER") #path to CSV file
 
 #### Function used ####
 mo2Num <- function(x) {match(tolower(x), tolower(month.abb))}
 
 #### Data tidying ####
 
-db <- read.csv("USERNAME.csv", header=F) # CSV file name - change USERNAME to your last.fm username
+db <- read.csv("LAST_FM_USERNAME.csv", header=F) # CSV file name - change LAST_FM_USERNAME to your last.fm username
 colnames(db) <- c("Artist", "Album", "Song", "Day")
 newcolumns <- transpose(as.data.frame(strsplit(db$Day,"\\s+")))
+typeof(newcolumns)
 colnames(newcolumns) <- c("Day", "Month", "Year", "Time")
 db$Day <- NULL
 db <- data.frame(db,newcolumns)
+
+db$Year <- as.integer(db$Year)
 rm(newcolumns)
 
-db_YEAR <- db[db$Year == 2022,]
+db_YEAR <- db[db$Year == 2023,]
 
 db_YEAR$Month <- mo2Num(db_YEAR$Month)
 db_YEAR$Time <- as.integer(gsub(":", "", db_YEAR$Time))
@@ -29,8 +38,8 @@ colnames(aux_db) <- c("Artist", "Month")
 
 top10 <-
   aux_db %>%
-    group_by(Artist, Month) %>% 
-    summarise(n=n(),.groups="rowwise")
+  group_by(Artist, Month) %>% 
+  summarise(n=n(),.groups="rowwise")
 
 top10 <- top10[order(top10$Month, top10$n, decreasing=T),]
 
@@ -39,25 +48,27 @@ top_artists <- aux_db %>%
   summarise(n=n(),.groups="rowwise")
 top_artists <- head(top_artists[order(top_artists$n, decreasing=T),1],10)
 
-top10 <- top10[top10$Artist %in% top_artists$Artist,]
+top10 <- as.data.frame(top10[top10$Artist %in% top_artists$Artist,])
 
-for (i in 1:10){
-  for (j in 1:12){
-    if (all(top10[top10$Artist == top_artists$Artist[i],2] != j)) {
-      top10 <- rbind(top10, c(top10$Artist[i],j,0))
+for(i in 1:12){
+  MissingArtist <- setdiff(unique(top10$Artist), unique(top10[top10$Month == i, "Artist"]))
+  if(length(MissingArtist) > 1 | sum(!is.na(MissingArtist)) != 0){
+    for(j in 1:length(MissingArtist)){
+      top10 <- rbind(top10, data.frame(Artist = MissingArtist[j], Month = i, n=0))
     }
   }
-  if (i == 10){
-    top10$Month <- as.integer(top10$Month)
-    top10$n <- as.integer(top10$n)
-    top10 <- top10[order(top10$Month, top10$n, decreasing=T),]
+  if(i == 12){
+    rm(MissingArtist, top_artists)
+    top10 <- top10[order(top10$Month),]
+    row.names(top10) <- 1:120
   }
 }
 
-rm(top_artists)
-
 #### MOST LISTENED MUSICIANS GRAPH ####
 q <- ggplot(data=top10, aes(x=Month, y=n, color=Artist)) 
+
+# Save the graph as a PNG with dimensions 2400x1350
+png(paste("PATH/TO/PNG/WITH/ITS/NAME", "-", year(Sys.Date()), ".png", sep=""), width=2400, height=1350)
 
 q + geom_line(size = 1.5) + 
   xlab("Month") + 
@@ -77,6 +88,8 @@ q + geom_line(size = 1.5) +
     legend.position = c(0.1,0.775)
   )
 
+dev.off()
+
 #### ALBUMS ####
 aux_db <- aux_db <- data.frame(db_YEAR$Album, db_YEAR$Month)
 colnames(aux_db) <- c("Album", "Month")
@@ -92,26 +105,28 @@ top_albums <- aux_db %>%
   summarise(n=n(),.groups="rowwise")
 top_albums <- head(top_albums[order(top_albums$n, decreasing=T),1],10)
 
-top10_albums <- top10_albums[top10_albums$Album %in% top_albums$Album,]
+top10_albums <- as.data.frame(top10_albums[top10_albums$Album %in% top_albums$Album,])
 
-for (i in 1:10){
-  for (j in 1:12){
-    if (all(top10_albums[top10_albums$Album == top_albums$Album[i],2] != j)) {
-      top10_albums <- rbind(top10_albums, c(top_albums$Album[i],j,0))
+for(i in 1:12){
+  MissingAlbum <- setdiff(unique(top10_albums$Album), unique(top10_albums[top10_albums$Month == i, "Album"]))
+  if(length(MissingAlbum) > 1 | sum(!is.na(MissingAlbum)) != 0){
+    for(j in 1:length(MissingAlbum)){
+      top10_albums <- rbind(top10_albums, data.frame(Album = MissingAlbum[j], Month = i, n=0))
     }
   }
-  if (i == 10){
-    top10_albums$Month <- as.integer(top10_albums$Month)
-    top10_albums$count <- as.integer(top10_albums$count)
-    top10_albums <- top10_albums[order(top10_albums$Month, top10_albums$count, decreasing=T),]
+  if(i == 12){
+    rm(MissingAlbum, top_albums)
+    top10_albums <- top10_albums[order(top10_albums$Month),]
+    row.names(top10_albums) <- 1:120
   }
 }
-
-rm(top_albums)
 
 #### MOST LISTENED ALBUMS GRAPH ####
 
 q2 <- ggplot(data=top10_albums, aes(x=Month, y=n, color=Album)) 
+
+# Save the graph as a PNG with dimensions 2400x1350
+png(paste("PATH/TO/PNG/WITH/ITS/NAME", "-", year(Sys.Date()), ".png", sep=""), width=2400, height=1350)
 
 q2 + geom_line(size = 1.5) + 
   xlab("Month") + 
@@ -131,17 +146,19 @@ q2 + geom_line(size = 1.5) +
     legend.position = c(0.1,0.775)
   )
 
+dev.off()
+
 #### TOP 100 ALBUMS DISTRIBUTION ####
 
 top100Albums <- distinct(db_YEAR %>% 
-          group_by(Album) %>% 
-          summarize(n=n(),Artist,.groups="rowwise") %>% 
-          arrange(desc(n))) 
+                           group_by(Album) %>% 
+                           summarize(n=n(),Artist,.groups="rowwise") %>% 
+                           arrange(desc(n))) 
 
 top100Albums <- tibble::rowid_to_column(
   head(top100Albums[!duplicated(top100Albums$Album),],100), 
   "Position"
-  )
+)
 
 p1 <- plot_ly(data=top100Albums, x=~Position , y=~n,
               type="scatter", mode="markers",
@@ -174,6 +191,9 @@ db_YEAR$Time <- NULL
 
 q3 <- ggplot(db_YEAR, aes(x=Hours))
 
+# Save the graph as a PNG with dimensions 2400x1350
+png(paste("PATH/TO/PNG/WITH/ITS/NAME", "-", year(Sys.Date()), ".png", sep=""), width=2400, height=1350)
+
 q3 + geom_bar(width=1, color="red", fill="gray") +
   coord_polar(start = -0.15) +
   theme_minimal()+
@@ -186,4 +206,4 @@ q3 + geom_bar(width=1, color="red", fill="gray") +
     axis.title.y = element_text(size=25)
   )
 
-
+dev.off()
