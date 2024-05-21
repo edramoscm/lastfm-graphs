@@ -1,32 +1,31 @@
 # install.packages("data.table")
 # install.packages("tidyverse")
 # install.packages("plotly")
-# install.packages("xtable")
-# install.packages("lubridate")
+
+############# PAY ATTENTION TO FILE PATHS
 
 library(data.table)
 library(ggplot2)
 library(plotly)
 library(dplyr)
-setwd("PATH/TO/FOLDER") #path to CSV file
+setwd("PATH/TO/CSV") #path to CSV file
 
 #### Function used ####
 mo2Num <- function(x) {match(tolower(x), tolower(month.abb))}
 
 #### Data tidying ####
 
-db <- read.csv("LAST_FM_USERNAME.csv", header=F) # CSV file name - change LAST_FM_USERNAME to your last.fm username
+db <- read.csv("USERNAME.csv", header=F) # CSV file name - change USERNAME to your last.fm username
 colnames(db) <- c("Artist", "Album", "Song", "Day")
 newcolumns <- transpose(as.data.frame(strsplit(db$Day,"\\s+")))
 typeof(newcolumns)
 colnames(newcolumns) <- c("Day", "Month", "Year", "Time")
 db$Day <- NULL
 db <- data.frame(db,newcolumns)
-
 db$Year <- as.integer(db$Year)
 rm(newcolumns)
 
-# Insert the year you want to get the results for instead of 2023
+# CHANGE THE YEAR HERE TO GET THE YEAR YOU'RE INTERESTED IN
 db_YEAR <- db[db$Year == 2023,]
 
 db_YEAR$Month <- mo2Num(db_YEAR$Month)
@@ -37,8 +36,7 @@ db_YEAR$Time <- as.integer(gsub(":", "", db_YEAR$Time))
 aux_db <- data.frame(db_YEAR$Artist, db_YEAR$Month)
 colnames(aux_db) <- c("Artist", "Month")
 
-top10 <-
-  aux_db %>%
+top10 <- aux_db %>%
   group_by(Artist, Month) %>% 
   summarise(n=n(),.groups="rowwise")
 
@@ -68,8 +66,7 @@ for(i in 1:12){
 #### MOST LISTENED MUSICIANS GRAPH ####
 q <- ggplot(data=top10, aes(x=Month, y=n, color=Artist)) 
 
-# Save the graph as a PNG with dimensions 2400x1350
-png(paste("PATH/TO/PNG/WITH/ITS/NAME", "-", year(Sys.Date()), ".png", sep=""), width=2400, height=1350)
+png(paste("PATH/TO/PNG/WITH/ITS/NAME", "-", unique(db_YEAR$Year), ".png", sep=""), width=2400, height=1350)
 
 q + geom_line(size = 1.5) + 
   xlab("Month") + 
@@ -95,7 +92,7 @@ dev.off()
 aux_db <- aux_db <- data.frame(db_YEAR$Album, db_YEAR$Month)
 colnames(aux_db) <- c("Album", "Month")
 
-top10_albums<- aux_db %>%
+top10_albums <- aux_db %>%
   group_by(Album, Month) %>% 
   summarise(n=n(),.groups="rowwise")
 
@@ -122,12 +119,14 @@ for(i in 1:12){
   }
 }
 
+top10_albums$Album <- gsub("Escalator.*", "Escalator Over The Hill", top10_albums$Album)
+
+
 #### MOST LISTENED ALBUMS GRAPH ####
 
 q2 <- ggplot(data=top10_albums, aes(x=Month, y=n, color=Album)) 
 
-# Save the graph as a PNG with dimensions 2400x1350
-png(paste("PATH/TO/PNG/WITH/ITS/NAME", "-", year(Sys.Date()), ".png", sep=""), width=2400, height=1350)
+png(paste("PATH/TO/PNG/WITH/ITS/NAME", "-", unique(db_YEAR$Year), ".png", sep=""), width=2400, height=1350)
 
 q2 + geom_line(size = 1.5) + 
   xlab("Month") + 
@@ -192,8 +191,7 @@ db_YEAR$Time <- NULL
 
 q3 <- ggplot(db_YEAR, aes(x=Hours))
 
-# Save the graph as a PNG with dimensions 2400x1350
-png(paste("PATH/TO/PNG/WITH/ITS/NAME", "-", year(Sys.Date()), ".png", sep=""), width=2400, height=1350)
+png(paste("PATH/TO/PNG/WITH/ITS/NAME", "-", unique(db_YEAR$Year), ".png", sep=""), width=1350, height=1350)
 
 q3 + geom_bar(width=1, color="red", fill="gray") +
   coord_polar(start = -0.15) +
@@ -204,7 +202,8 @@ q3 + geom_bar(width=1, color="red", fill="gray") +
   scale_x_continuous(breaks=seq(0,23)) +
   theme(
     plot.title = element_text(hjust = 0.5, size = 30),
-    axis.title.y = element_text(size=25)
+    axis.title.y = element_text(size=25),
+    axis.title.x = element_text(size=25)
   )
 
 dev.off()
