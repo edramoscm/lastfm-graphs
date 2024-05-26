@@ -18,7 +18,6 @@ mo2Num <- function(x) {match(tolower(x), tolower(month.abb))}
 db <- read.csv("USERNAME.csv", header=F) # CSV file name - change USERNAME to your last.fm username
 colnames(db) <- c("Artist", "Album", "Song", "Day")
 newcolumns <- transpose(as.data.frame(strsplit(db$Day,"\\s+")))
-typeof(newcolumns)
 colnames(newcolumns) <- c("Day", "Month", "Year", "Time")
 db$Day <- NULL
 db <- data.frame(db,newcolumns)
